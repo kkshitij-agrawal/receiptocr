@@ -1,6 +1,5 @@
-
 from flask import Flask, render_template, request, jsonify
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageFilter
 import pytesseract
 
 app = Flask(__name__)
@@ -18,7 +17,13 @@ def upload_file():
         return jsonify({"error": "No selected file"})
     if file:
         image = Image.open(file.stream)
-        text = pytesseract.image_to_string(image)
+        
+        # Image pre-processing
+        image = image.convert('L')  # Convert to grayscale
+        image = image.point(lambda x: 0 if x < 128 else 255, '1')  # Binarization
+        image = image.resize((int(image.width * 2), int(image.height * 2)))  # Resize for better accuracy
+        
+        text = pytesseract.image_to_string(image, lang='eng')
         return jsonify({"extracted_text": text})
 
 if __name__ == '__main__':
