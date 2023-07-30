@@ -1,37 +1,28 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Receipt OCR Webapp</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt OCR</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
+
 <body>
     <div class="container">
-        <h2>Upload your receipt</h2>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" name="file" required>
-            <input type="submit" value="Upload and Extract">
+        <h1>Receipt OCR</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" required>
+            <input type="submit" value="Upload & Extract Text">
         </form>
-        <h3>Extracted Text:</h3>
-        <textarea id="output" readonly></textarea>
+        <div id="output">
+            <h2>Extracted Text:</h2>
+            <textarea readonly>{{ request.json['extracted_text'] if request.json and 'extracted_text' in request.json else '' }}</textarea>
+            <h2>Processed Image:</h2>
+            <img src="{{ request.json['processed_image_path'] if request.json and 'processed_image_path' in request.json else '#' }}" alt="Processed Image">
+        </div>
     </div>
-    <script>
-        $("#uploadForm").submit(function(event){
-            event.preventDefault();
-            var formData = new FormData(this);
-            $.ajax({
-                url: '/upload',
-                type: 'POST',
-                data: formData,
-                success: function(data) {
-                    $('#output').val(data.extracted_text);
-                },
-                cache: false,
-                contentType: false,
-                processData: false
-            });
-        });
-    </script>
 </body>
+
 </html>
