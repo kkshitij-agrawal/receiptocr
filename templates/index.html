@@ -18,9 +18,9 @@
         </form>
         <div id="output">
             <h2>Extracted Text:</h2>
-            <textarea readonly>{{ request.json['extracted_text'] if request.json and 'extracted_text' in request.json else '' }}</textarea>
+            <textarea readonly>{{ request.json['extracted_text'] if request.method == 'POST' and request.json and 'extracted_text' in request.json else '' }}</textarea>
             <h2>Processed Image:</h2>
-            <img src="{{ request.json['processed_image_path'] if request.json and 'processed_image_path' in request.json else '#' }}" alt="Processed Image">
+            <img src="{{ request.json['processed_image_path'] if request.method == 'POST' and request.json and 'processed_image_path' in request.json else '#' }}" alt="Processed Image">
         </div>
     </div>
 </body>
