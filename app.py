@@ -30,16 +30,20 @@ def upload_file():
         # Image pre-processing using OpenCV
         image_np = np.array(image)
         gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
-        adaptive_thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+        denoised = cv2.fastNlMeansDenoising(gray, None, 30, 7, 21)
+        adaptive_thresh = cv2.adaptiveThreshold(denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
         kernel = np.ones((2,2), np.uint8)
         morphed = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
+        scaled = cv2.resize(morphed, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
         
         # Convert back to PIL Image and save for display
-        processed_image = Image.fromarray(morphed)
+        processed_image = Image.fromarray(scaled)
         processed_image_path = os.path.join(PROCESSED_IMAGE_DIR, 'processed.png')
         processed_image.save(processed_image_path)
         
-        text = pytesseract.image_to_string(processed_image, lang='eng')
+        # Extract text using Tesseract with specific configuration
+        custom_config = r'--oem 3 --psm 6'  # Use LSTM OCR Engine and assume a uniform block of text
+        text = pytesseract.image_to_string(processed_image, lang='eng', config=custom_config)
         return jsonify({"extracted_text": text, "processed_image_path": processed_image_path})
 
 @app.route('/processed_image/<filename>')
